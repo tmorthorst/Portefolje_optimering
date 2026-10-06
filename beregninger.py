@@ -15,34 +15,33 @@ def beregn_capm_afkast(aktie_data, markeds_ticker = '^GSPC', rf = 0.04, mrp=0.06
     startdato = aktie_data.index[0]
     slutdato = aktie_data.index[-1]
 
-    #Henter markedsdata
-    marked_data = yf.download(markeds_ticker, startdato, slutdato)
+   # Henter markedsdata OG valutakurs
+    marked_data = yf.download([markeds_ticker, 'DKK=X'], start=startdato, end=slutdato)
+    
     if 'Adj Close' in marked_data.columns:
-        marked_pris = marked_data['Adj Close']
+        marked_pris_df = marked_data['Adj Close']
     else:
-        marked_pris = marked_data['Close']
+        marked_pris_df = marked_data['Close']
 
-# NYT: Tvinger dataen til at være en 1D-vektor i stedet for en N x 1 matrix
-    if isinstance(marked_pris, pd.DataFrame):
-        marked_pris = marked_pris.squeeze()
+    # NYT: Nulstil klokkeslæt for at matche aktierne
+    marked_pris_df.index = pd.to_datetime(marked_pris_df.index).normalize()
 
+    # Udtræk S&P 500 og omregn til DKK
+    marked_pris = marked_pris_df[markeds_ticker] * marked_pris_df['DKK=X']
 
-# NYT: Nulstil klokkeslæt på markedsdata for at matche aktierne
-    marked_pris.index = pd.to_datetime(marked_pris.index).normalize()
-
-    #Beregn kontinuerte log-afkast: ln(P_t / P_{t-1})
-    marked_afkast = np.log(marked_pris / marked_pris.shift(1)).dropna()
-    aktie_afkast = np.log(aktie_data / aktie_data.shift(1)).dropna()
-
-    # 4. Synkroniser tidsrækker (fjerner dage hvor enten DK eller USA har lukket pga. helligdage)
-    faelles_index = aktie_afkast.index.intersection(marked_afkast.index)
+    # 4. Synkroniser tidsrækker PÅ PRISNIVEAU (før vi regner afkast)
+    fælles_index = aktie_data.index.intersection(marked_pris.index)
 
     # Sikkerheds-tjek
-    if len(faelles_index) == 0:
+    if len(fælles_index) == 0:
         raise ValueError("FEJL: Ingen fælles datoer mellem aktier og markedet!")
 
-    aktie_afkast = aktie_afkast.loc[faelles_index]
-    marked_afkast = marked_afkast.loc[faelles_index]
+    aktie_data = aktie_data.loc[fælles_index]
+    marked_pris = marked_pris.loc[fælles_index]
+
+    # Beregn kontinuerte log-afkast på de matchede dage: ln(P_t / P_{t-1})
+    marked_afkast = np.log(marked_pris / marked_pris.shift(1)).dropna()
+    aktie_afkast = np.log(aktie_data / aktie_data.shift(1)).dropna()
 
 
     # 5. Beregn markedets årlige varians: Var(R_m) * 252

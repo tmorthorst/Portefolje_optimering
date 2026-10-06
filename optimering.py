@@ -33,7 +33,7 @@ def optimer_portefølje( mu, sigma, antal_simuleringer =10000, rf=0.04):
         portefølje_risiko = np.sqrt(np.dot(vægte.T, np.dot(sigma_matrix, vægte)))
 
       # Jeg gemmer resultaterne (Afkast, Risiko og Sharpe Ratio):
-      # Jeg antager en risikofri rente på 0 for at forenkle Sharpe Ratio beregningen
+      # Sharpe Ratio beregnes med rf =0.04 (4.0%) 
 
         resultater[0, i] = portefølje_afkast
         resultater[1, i] = portefølje_risiko

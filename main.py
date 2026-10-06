@@ -4,15 +4,14 @@ from beregninger import beregn_capm_afkast
 from optimering import optimer_portefølje
 from visualisering import plot_efficient_frontier
 
-
 #1 Setup
-#vælger fem aktier fra C25
+#vælger otte aktier (4 fra OMXC25 og 4 fra USA) til porteføljen
 aktier = ['NOVO-B.CO', 'DANSKE.CO', 'VWS.CO', 'CARL-B.CO', 'AAPL', 'MSFT', 'GOOGL', 'META']
 
 #sætter slutdato til i dag:
 slutdato = dt.datetime.today().strftime('%Y-%m-%d')
 
-#sætter startdato til 1 år tilbage fra i dag:
+#sætter startdato til 5 år tilbage fra i dag:
 startdato = (dt.datetime.today() - dt.timedelta(days=5*365)).strftime('%Y-%m-%d'  )
 
 #2 pipeline
@@ -25,8 +24,9 @@ vægte, info, alle_resultater = optimer_portefølje(mu, sigma)
 print("\n" + "="*30)
 print("OPTIMAL PORTEFØLJE (Max Sharpe vha. Capm)")
 print("="*30)
-for i in range(len(aktier)):
-    print(f"{aktier[i]}: {vægte[i]:.2%}")
+# EFTER:
+for i in range(len(vægte)):
+    print(f"{mu.index[i]}: {vægte[i]:.2%}")
 
 print("-"*30)
 print(f"Forventet årligt afkast: {info[0]:.2%}")
