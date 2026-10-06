@@ -24,7 +24,7 @@ vægte, info, alle_resultater = optimer_portefølje(mu, sigma)
 print("\n" + "="*30)
 print("OPTIMAL PORTEFØLJE (Max Sharpe vha. Capm)")
 print("="*30)
-# EFTER:
+print("Vægte for de optimale aktier:")
 for i in range(len(vægte)):
     print(f"{mu.index[i]}: {vægte[i]:.2%}")
 
@@ -34,6 +34,5 @@ print(f"Forventet Årlig risiko:  {info[1]:.2%}")
 print(f"Sharpe ratio:            {info[2]:.2f}")
 
 
-# print og plot
-print(f"\nOptimal Sharpe Ratio: {info[2]:.2f}")
+# plot
 plot_efficient_frontier(alle_resultater, info)
